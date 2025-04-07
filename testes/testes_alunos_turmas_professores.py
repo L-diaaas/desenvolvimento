@@ -6,6 +6,8 @@ from turmas.turmas_routes import turmas_blueprint
 from turmas.turmas_model import apaga_todas_turmas
 
 
+# Para rodar esse teste digite no terminal: python -m unittest -v testes.testes_alunos_turmas_professores
+
 class TestAluno(unittest.TestCase):
     def setUp(self):
         self.app = Flask(__name__)
