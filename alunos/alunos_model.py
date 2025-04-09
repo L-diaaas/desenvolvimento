@@ -14,15 +14,16 @@ dados = {
 }
 
 alunos = dados
+aluno_id_controle = 1  # Isso precisa estar aqui para o adicionar_aluno funcionar corretamente
+
 class AlunoNaoEncontrado(Exception):
     pass
 
-
 def listar_alunos():
-    return alunos
+    return alunos["alunos"]
 
 def aluno_por_id(id_aluno):
-    aluno = next((a for a in alunos if a["id"] == id_aluno), None)
+    aluno = next((a for a in alunos["alunos"] if a.get("id") == id_aluno), None)
     if not aluno:
         raise AlunoNaoEncontrado
     return aluno
@@ -39,7 +40,7 @@ def adicionar_aluno(data):
         "nota_segundo_semestre": float(data["nota_segundo_semestre"]),
         "media_final": float(data["media_final"])
     }
-    alunos.append(novo_aluno)
+    alunos["alunos"].append(novo_aluno)
     aluno_id_controle += 1
     return novo_aluno
 
@@ -56,4 +57,4 @@ def atualizar_aluno(id_aluno, data):
 
 def excluir_aluno(id_aluno):
     aluno = aluno_por_id(id_aluno)
-    alunos.remove(aluno)
+    alunos["alunos"].remove(aluno)

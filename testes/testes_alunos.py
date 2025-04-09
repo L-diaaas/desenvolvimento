@@ -1,12 +1,17 @@
 import unittest
 from flask import Flask
-from alunos.alunos_rotas import alunos_blueprint 
+from alunos.alunos_rotas import alunos_blueprint
+from alunos.alunos_model import alunos, dados, excluir_aluno
+
 
 class TestAluno(unittest.TestCase):
     def setUp(self):
         self.app = Flask(__name__)
         self.app.register_blueprint(alunos_blueprint)
         self.client = self.app.test_client()
+
+        # Resetando alunos para garantir ambiente limpo
+        alunos["alunos"].clear()
 
     def test_01_adicionar_aluno_valido(self):
         payload = {
@@ -93,7 +98,6 @@ class TestAluno(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
 
     def test_09_idade_como_texto(self):
-        """Idade como texto"""
         payload = {
             "nome": "Pedro",
             "idade": "vinte",
@@ -106,7 +110,6 @@ class TestAluno(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
 
     def test_10_turma_id_negativo(self):
-        
         payload = {
             "nome": "Paula",
             "idade": 22,
@@ -118,7 +121,30 @@ class TestAluno(unittest.TestCase):
         response = self.client.post('/alunos', json=payload)
         self.assertEqual(response.status_code, 201)
         data = response.get_json()
-        self.assertLess(data["turma_id"], 0)  
+        self.assertLess(data["turma_id"], 0)
+
+    def test_11_excluir_aluno_existente(self):
+        resposta = self.client.post('/alunos', json={
+            "nome": "Aluno para Deletar",
+            "idade": 21,
+            "turma_id": 100,
+            "data_nascimento": "2003-05-10",
+            "nota_primeiro_semestre": 7.0,
+            "nota_segundo_semestre": 8.0,
+            "media_final": 7.5
+        })
+        self.assertEqual(resposta.status_code, 201)
+        aluno_id = resposta.get_json()["id"]
+
+        delete_resposta = self.client.delete(f'/alunos/{aluno_id}')
+        self.assertEqual(delete_resposta.status_code, 200)
+        self.assertEqual(delete_resposta.get_json()["message"], "Aluno deletado com sucesso!")
+
+    def test_12_excluir_aluno_inexistente(self):
+        resposta = self.client.delete('/alunos/9999')
+        self.assertEqual(resposta.status_code, 404)
+        self.assertEqual(resposta.get_json()["message"], "Aluno não encontrado.")
+
 
 if __name__ == "__main__":
     unittest.main()
