@@ -7,7 +7,7 @@ from turmas.turmas_routes import turmas_blueprint
 from turmas.turmas_model import apaga_todas_turmas
 
 
-
+# Instalar o requirements com: pip install -r requirements.txt
 # Para rodar esse teste digite no terminal: python -m unittest -v testes.testes_alunos_turmas_professores
 
 class TestAluno(unittest.TestCase):
