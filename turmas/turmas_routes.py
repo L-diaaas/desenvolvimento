@@ -5,7 +5,6 @@ from turmas.turmas_model import (
     turma_por_id,
     atualiza_turma,
     adiciona_turma,
-    apaga_todas_turmas,
     apaga_turma
 )
 
@@ -41,10 +40,6 @@ def update_turma(id_turma):
     except Turma_nao_encontrada:
         return jsonify({'message': 'Turma não encontrada'}), 404
 
-@turmas_blueprint.route('/turmas', methods=['DELETE'])
-def delete_turmas():
-    apaga_todas_turmas()
-    return jsonify({'message': 'Todas as turmas foram removidas'}), 200
 
 @turmas_blueprint.route('/turmas/<int:id_turma>', methods=['DELETE'])
 def delete_turma(id_turma):

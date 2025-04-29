@@ -1,60 +1,103 @@
-dados = {
-    "alunos": [
-        {
-            "nome": "Maria Silva",
-            "turma_id": 101,
-            "idade": 20,
-            "data_nascimento": "2004-03-19",
-            "nota_primeiro_semestre": 8.5,
-            "nota_segundo_semestre": 9.0,
-            "media_final": 8.75
-        },
-        {}
-    ]
-}
+from datetime import datetime, date
+from config import db
 
-alunos = dados
-aluno_id_controle = 1  # Isso precisa estar aqui para o adicionar_aluno funcionar corretamente
+class Aluno(db.Model):
+    __tablename__ = "alunos"
+    
+    id = db.Column(db.Integer, primary_key=True)
+    nome = db.Column(db.String(100), nullable=False)
+    idade = db.Column(db.Integer, nullable=False)
+    data_nascimento = db.Column(db.Date, nullable=False)
+    nota_primeiro_semestre = db.Column(db.Float, nullable=False)
+    nota_segundo_semestre = db.Column(db.Float, nullable=False)
+    media_final = db.Column(db.Float, nullable=False)
+
+    turma_id = db.Column(db.Integer, db.ForeignKey("turmas.id_turma"), nullable=False)
+    turma = db.relationship("Turmas", backref="alunos")
+
+    def __init__ (self, nome, data_nascimento, nota_primeiro_semestre, nota_segundo_semestre, turma_id):
+        self.nome = nome
+        self.data_nascimento = data_nascimento
+        self.nota_primeiro_semestre = nota_primeiro_semestre
+        self.nota_segundo_semestre = nota_segundo_semestre
+        self.turma_id = turma_id
+        self.idade = self.calcular_idade()
+        self.media_final = self.calcular_media()
+
+    def calcular_idade(self):
+        today = date.today()
+        return today.year - self.data_nascimento.year - (
+            (today.month, today.day) < (self.data_nascimento.month, self.data_nascimento.day)
+        )
+
+    def calcular_media(self):
+        return (self.nota_primeiro_semestre + self.nota_segundo_semestre) / 2
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'nome': self.nome,
+            'idade': self.idade,
+            'data_nascimento': self.data_nascimento.isoformat(),
+            'nota_primeiro_semestre': self.nota_primeiro_semestre,
+            'nota_segundo_semestre': self.nota_segundo_semestre,
+            'turma_id': self.turma_id,
+            'media_final': self.media_final
+        }
 
 class AlunoNaoEncontrado(Exception):
     pass
 
-def listar_alunos():
-    return alunos["alunos"]
-
 def aluno_por_id(id_aluno):
-    aluno = next((a for a in alunos["alunos"] if a.get("id") == id_aluno), None)
+    aluno = Aluno.query.get(id_aluno)
+    if not aluno:
+        raise AlunoNaoEncontrado(f'Aluno não encontrado.')
+    return aluno.to_dict()
+
+def listar_alunos():
+    alunos = Aluno.query.all()
+    return [aluno.to_dict() for aluno in alunos]
+
+def adicionar_aluno(novos_dados):
+    from turmas.turmas_model import Turmas 
+
+    turma = Turmas.query.get(novos_dados['turma_id'])
+    if turma is None:
+        return {"message": "Turma não existe"}, 404
+
+    novo_aluno = Aluno(
+        nome=novos_dados['nome'],
+        data_nascimento=datetime.strptime(novos_dados['data_nascimento'], "%Y-%m-%d").date(),
+        nota_primeiro_semestre=float(novos_dados['nota_primeiro_semestre']),
+        nota_segundo_semestre=float(novos_dados['nota_segundo_semestre']),
+        turma_id=int(novos_dados['turma_id']),
+    )
+
+    db.session.add(novo_aluno)
+    db.session.commit()
+    return {"message": "Aluno adicionado com sucesso!"}, 201
+
+def atualizar_aluno(id_aluno, novos_dados):
+    aluno = Aluno.query.get(id_aluno)
     if not aluno:
         raise AlunoNaoEncontrado
-    return aluno
 
-def adicionar_aluno(data):
-    global aluno_id_controle
-    novo_aluno = {
-        "id": aluno_id_controle,
-        "nome": data["nome"],
-        "idade": data["idade"],
-        "turma_id": data.get("turma_id"),
-        "data_nascimento": data.get("data_nascimento"),
-        "nota_primeiro_semestre": float(data["nota_primeiro_semestre"]),
-        "nota_segundo_semestre": float(data["nota_segundo_semestre"]),
-        "media_final": float(data["media_final"])
-    }
-    alunos["alunos"].append(novo_aluno)
-    aluno_id_controle += 1
-    return novo_aluno
+    aluno.nome = novos_dados['nome']
+    aluno.data_nascimento = datetime.strptime(novos_dados['data_nascimento'], "%Y-%m-%d").date()
+    aluno.nota_primeiro_semestre = float(novos_dados['nota_primeiro_semestre'])
+    aluno.nota_segundo_semestre = float(novos_dados['nota_segundo_semestre'])
+    aluno.turma_id = int(novos_dados['turma_id'])
 
-def atualizar_aluno(id_aluno, data):
-    aluno = aluno_por_id(id_aluno)
-    aluno["nome"] = data.get("nome", aluno["nome"])
-    aluno["idade"] = data.get("idade", aluno["idade"])
-    aluno["turma_id"] = data.get("turma_id", aluno["turma_id"])
-    aluno["data_nascimento"] = data.get("data_nascimento", aluno["data_nascimento"])
-    aluno["nota_primeiro_semestre"] = float(data.get("nota_primeiro_semestre", aluno["nota_primeiro_semestre"]))
-    aluno["nota_segundo_semestre"] = float(data.get("nota_segundo_semestre", aluno["nota_segundo_semestre"]))
-    aluno["media_final"] = float(data.get("media_final", aluno["media_final"]))
-    return aluno
+    aluno.idade = aluno.calcular_idade()
+    aluno.media_final = aluno.calcular_media()
+
+    db.session.commit()
+    return aluno.to_dict()
 
 def excluir_aluno(id_aluno):
-    aluno = aluno_por_id(id_aluno)
-    alunos["alunos"].remove(aluno)
+    aluno = Aluno.query.get(id_aluno)
+    if not aluno:
+        raise AlunoNaoEncontrado(f'Aluno não encontrado.')
+
+    db.session.delete(aluno)
+    db.session.commit()

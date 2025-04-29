@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  api:
+    build: .
+    container_name: api_gestao_escolar
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/app
+    environment:
+      - FLASK_ENV=development
+    command: python app.py
+
+
+comandos:
+docker-compose build
+docker-compose up
+
+A aplicação estará acessível em:
+http://localhost:5000
+Swagger: http://localhost:5000/api/docs
