@@ -225,9 +225,21 @@ class TestAlunosRotas(unittest.TestCase):
 
 class TestTeacherMethods(unittest.TestCase):
 
+    def setUp(self):
+        app.config["TESTING"] = True
+        app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///:memory:"
+        self.client = app.test_client()
+        with app.app_context():
+            db.create_all()
+
+    def tearDown(self):
+        with app.app_context():
+            db.drop_all()
+
     def test_000_professores_retorna_lista(self):
-        response = requests.get("http://localhost:5000/api/professores").json()
-        self.assertEqual(type(response), list)
+        response = self.client.get("/api/professores")
+        self.assertEqual(response.status_code, 200)
+        self.assertIsInstance(response.json, list)
 
     def test_001_criar_professor_sucesso(self):
         professor = {
@@ -237,9 +249,9 @@ class TestTeacherMethods(unittest.TestCase):
             "observacoes": "Ele disponibiliza materiais complementares, como slides, artigos e listas de exercícios, que ajudam os alunos a revisar e aprofundar o conteúdo após a aula."
         }
 
-        response = requests.post("http://localhost:5000/api/professores", json=professor)
+        response = self.client.post("/api/professores", json=professor)
         self.assertEqual(response.status_code, 200)
-        response_data = response.json()
+        response_data = response.json
         self.assertEqual(response_data['nome'], professor['nome'])
         self.assertEqual(response_data['idade'], professor['idade'])
         self.assertEqual(response_data['materia'], professor['materia'])
@@ -253,24 +265,28 @@ class TestTeacherMethods(unittest.TestCase):
             "materia": "SQL",
             "observacoes": "..."
         }
-        response = requests.post("http://localhost:5000/api/professores", json=professor)
-
+        response = self.client.post("/api/professores", json=professor)
         self.assertNotEqual(response.status_code, 200)
-        if 'application/json' in response.headers.get('Content-Type', ''):
-            data = response.json()
-            self.assertIn('message', data)
-        else:
-            self.assertTrue(response.text)
+        data = response.json
+        self.assertIn("message", data)
 
     def test_003_buscar_professor_id_sucesso(self):
-        id = 1
-        response = requests.get(f"http://localhost:5000/api/professores/{id}")
+        professor = {
+            "nome": "Carlos Souza",
+            "idade": 40,
+            "materia": "Geografia",
+            "observacoes": "Especialista em cartografia"
+        }
+        response = self.client.post("/api/professores", json=professor)
         self.assertEqual(response.status_code, 200)
-        self.assertIn("nome", response.json())
+        id = response.json['id']
+
+        response = self.client.get(f"/api/professores/{id}")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("nome", response.json)
 
     def test_004_buscar_professor_id_erro(self):
-        id_erro = 999999
-        response = requests.get(f"http://localhost:5000/api/professores/{id_erro}")
+        response = self.client.get("/api/professores/999999")
         self.assertEqual(response.status_code, 404)
 
     def test_005_att_professor_sucesso(self):
@@ -280,10 +296,9 @@ class TestTeacherMethods(unittest.TestCase):
             'materia': 'SQL',
             'observacoes': 'Texto inicial.'
         }
-        response = requests.post("http://localhost:5000/api/professores", json=novo_professor)
+        response = self.client.post("/api/professores", json=novo_professor)
         self.assertEqual(response.status_code, 200)
-        criado = response.json()
-        id_criado = criado['id']
+        id_criado = response.json['id']
 
         professor_att = {
             'nome': 'Ana Oliveira',
@@ -292,22 +307,20 @@ class TestTeacherMethods(unittest.TestCase):
             'observacoes': 'Durante as aulas, ela incentiva a participação dos alunos...'
         }
 
-        response = requests.put(f"http://localhost:5000/api/professores/{id_criado}", json=professor_att)
+        response = self.client.put(f"/api/professores/{id_criado}", json=professor_att)
         self.assertEqual(response.status_code, 200)
 
-        atualizado = response.json()
+        atualizado = response.json
         self.assertEqual(atualizado['materia'], professor_att['materia'])
 
     def test_006_att_professor_erro(self):
-        id_inexistente = 99999
         professor_att = {
-            'id': id_inexistente,
             'nome': 'Ana Oliveira',
             'idade': 35,
             'materia': 'Matemática Aplicada',
             'observacoes': 'Texto de teste.'
         }
-        response = requests.put(f"http://localhost:5000/api/professores/{id_inexistente}", json=professor_att)
+        response = self.client.put("/api/professores/99999", json=professor_att)
         self.assertEqual(response.status_code, 404)
 
     def test_007_excluir_professor_sucesso(self):
@@ -318,17 +331,17 @@ class TestTeacherMethods(unittest.TestCase):
             'observacoes': 'Texto de exemplo.'
         }
 
-        response = requests.post("http://localhost:5000/api/professores", json=professor)
+        response = self.client.post("/api/professores", json=professor)
         self.assertEqual(response.status_code, 200)
-        criado = response.json()
-        id_criado = criado['id']
+        id_criado = response.json['id']
 
-        response = requests.delete(f"http://localhost:5000/api/professores/{id_criado}")
-        self.assertEqual(response.status_code, 204)
+        response = self.client.delete(f"/api/professores/{id_criado}")
+        self.assertEqual(response.status_code, 200)
 
     def test_008_excluir_professor_erro(self):
-        response = requests.delete(f"http://localhost:5000/api/professores/999999")
+        response = self.client.delete("/api/professores/999999")
         self.assertEqual(response.status_code, 404)
+
 
 if __name__ == "__main__":
     unittest.main()
