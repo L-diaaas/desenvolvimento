@@ -13,7 +13,6 @@ class TestAlunosRotas(unittest.TestCase):
         with app.app_context():
             db.create_all()
 
-            # Importa e cria professor de teste (sem definir ID manualmente)
             from professores.professores_model import Professor
             professor = Professor(
                 nome="Prof. Teste",
@@ -24,12 +23,11 @@ class TestAlunosRotas(unittest.TestCase):
             db.session.add(professor)
             db.session.commit()
 
-            # Cria turma com campos obrigatórios
             turma = Turmas(
                 nome="Turma Teste",
                 descricao="Descrição da turma",
                 ativo=True,
-                professor_id=professor.id  # CORRETO agora
+                professor_id=professor.id  
             )
             db.session.add(turma)
             db.session.commit()
@@ -45,7 +43,7 @@ class TestAlunosRotas(unittest.TestCase):
             "data_nascimento": "2006-01-01",
             "nota_primeiro_semestre": 7.0,
             "nota_segundo_semestre": 8.0,
-            "turma_id": turma_id or self.turma_id  # Utiliza turma_id passado ou o criado no setUp
+            "turma_id": turma_id or self.turma_id  
         }
 
     def test_get_alunos_vazio(self):
@@ -56,10 +54,9 @@ class TestAlunosRotas(unittest.TestCase):
     def test_post_aluno(self):
         aluno = self.criar_aluno()
         response = self.client.post("/alunos", json=aluno)
-        print(response.json)  # Para inspecionar o conteúdo da resposta
+        print(response.json) 
         self.assertEqual(response.status_code, 201)
         
-        # Verificando se a chave "message" está presente
         self.assertTrue("message" in response.json, "A chave 'message' não foi encontrada na resposta.")
         self.assertEqual(response.json["message"], "Aluno adicionado com sucesso!")
 

@@ -6,12 +6,13 @@ professores_bp = Blueprint('professores', __name__)
 def listarTodosProfessores():
   return jsonify(getTodosProfessores())
 
-@professores_bp.route("/professores",methods=['POST'])
-def adicionarProfessor():
+@professores_bp.route("/professores", methods=["POST"])
+def postProfessor():
+    dados = request.json
     try:
-        return jsonify(criarProfessor(request.json))
+        return jsonify(criarProfessor(dados))
     except criarProfessorErro as e:
-        return jsonify({f"mensagem": e.mensagem}), 400
+        return jsonify({'message': e.mensagem}), 400
 
 @professores_bp.route("/professores/<int:idProfessor>", methods=['GET'])
 def getProfessorId(idProfessor):

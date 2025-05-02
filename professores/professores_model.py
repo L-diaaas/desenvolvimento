@@ -32,6 +32,9 @@ def getTodosProfessores():
     return [professor.to_dict() for professor in professores]
 
 def criarProfessor(dados):
+    if not dados.get('nome') or dados.get('idade') is None or not dados.get('materia'):
+        raise criarProfessorErro("Campos obrigatórios ausentes ou inválidos.")
+
     novo_professor = Professor(**dados)
     db.session.add(novo_professor)
     db.session.commit()
@@ -47,7 +50,12 @@ def attProfessor(idProfessor, novoProfessor):
     professor = Professor.query.get(idProfessor)
     if not professor:
         raise ProfessorNaoEncontrado
-    professor.nome = novoProfessor['nome']
+    
+    professor.nome = novoProfessor.get('nome', professor.nome)
+    professor.idade = novoProfessor.get('idade', professor.idade)
+    professor.materia = novoProfessor.get('materia', professor.materia)
+    professor.observacoes = novoProfessor.get('observacoes', professor.observacoes)
+
     db.session.commit()
     return professor.to_dict()
 

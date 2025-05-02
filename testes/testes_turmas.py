@@ -13,7 +13,6 @@ class TestTurmasRotas(unittest.TestCase):
         with app.app_context():
             db.create_all()
 
-            # Importa e cria professor de teste
             from professores.professores_model import Professor
             professor = Professor(
                 nome="Prof. Teste",
@@ -24,7 +23,6 @@ class TestTurmasRotas(unittest.TestCase):
             db.session.add(professor)
             db.session.commit()
 
-            # Cria turma com campos obrigatórios
             turma = Turmas(
                 nome="Turma Teste",
                 descricao="Descrição da turma",
@@ -44,12 +42,12 @@ class TestTurmasRotas(unittest.TestCase):
             "nome": "Turma Teste 2",
             "descricao": "Nova turma de teste",
             "ativo": True,
-            "professor_id": professor_id or self.turma_id  # Utiliza professor_id passado ou o criado no setUp
+            "professor_id": professor_id or self.turma_id
         }
 
     def test_get_turmas_vazio(self):
         with app.app_context():
-            db.session.query(Turmas).delete()  # Limpa a tabela de turmas
+            db.session.query(Turmas).delete()
             db.session.commit()
 
         response = self.client.get("/turmas")
@@ -59,7 +57,7 @@ class TestTurmasRotas(unittest.TestCase):
     def test_post_turma(self):
         turma = self.criar_turma()
         response = self.client.post("/turmas", json=turma)
-        print(response.json)  # Para inspecionar o conteúdo da resposta
+        print(response.json)
         self.assertEqual(response.status_code, 201)
         self.assertTrue("message" in response.json)
         self.assertEqual(response.json["message"], "Turma adicionada com sucesso!")
@@ -69,7 +67,7 @@ class TestTurmasRotas(unittest.TestCase):
         self.client.post("/turmas", json=turma)
         response = self.client.get(f"/turmas/{self.turma_id}")
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json["nome"], "Turma Teste")  # Corrigido para comparar com o nome correto
+        self.assertEqual(response.json["nome"], "Turma Teste")
 
     def test_get_turma_inexistente(self):
         response = self.client.get("/turmas/999")
@@ -105,7 +103,6 @@ class TestTurmasRotas(unittest.TestCase):
         turma = self.criar_turma(professor_id=999)
         response = self.client.post("/turmas", json=turma)
         
-        # Verificar se a resposta contém a chave "message"
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.json["message"], "Professor não existe.")
 

@@ -8,7 +8,6 @@ from professores.professores_model import (
 api = Namespace('professores', description='Operações relacionadas aos professores')
 
 professor_model = api.model('Professor', {
-    'id': fields.Integer(required=True),
     'nome': fields.String(required=True),
     'idade': fields.Integer(required=True),
     'materia': fields.String(required=True),
