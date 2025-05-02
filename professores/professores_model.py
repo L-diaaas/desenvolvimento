@@ -2,7 +2,7 @@ from config import db
 
 class Professor(db.Model):
     __tablename__ = "professores"
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     nome = db.Column(db.String(100), nullable=False)
     idade = db.Column(db.Integer)
     materia = db.Column(db.String(100), nullable=False)
@@ -10,8 +10,7 @@ class Professor(db.Model):
 
     turmas = db.relationship('Turmas', back_populates='professor')
 
-    def __init__(self, id, nome, idade, materia, observacoes):
-        self.id = id
+    def __init__(self, nome, idade, materia, observacoes):
         self.nome = nome
         self.idade = idade
         self.materia = materia

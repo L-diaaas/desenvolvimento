@@ -22,7 +22,7 @@ def post_aluno():
         if not data:
             return jsonify({"message": "Dados inválidos ou ausentes"}), 400
         novo_aluno = adicionar_aluno(data)
-        return jsonify(novo_aluno), 201
+        return jsonify({"message": "Aluno adicionado com sucesso!"}), 201  # Alterado para incluir a chave "message"
     except KeyError as e:
         return jsonify({"message": f"Faltando campo obrigatório: {str(e)}"}), 400
     except ValueError as e:

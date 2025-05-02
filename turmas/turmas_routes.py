@@ -25,11 +25,11 @@ def get_turma(id_turma):
 @turmas_blueprint.route('/turmas', methods=['POST'])
 def create_turma():
     data = request.json
-    if not data or 'id' not in data:
+    if not data or 'nome' not in data or 'professor_id' not in data:
         return jsonify({'error': 'Dados inválidos'}), 400
     
-    adiciona_turma(data)
-    return jsonify(data), 201
+    message, status_code = adiciona_turma(data)
+    return jsonify(message), status_code
 
 @turmas_blueprint.route('/turmas/<int:id_turma>', methods=['PUT'])
 def update_turma(id_turma):

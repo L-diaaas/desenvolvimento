@@ -1,12 +1,10 @@
 import unittest
 import requests
 
-
-
 class TestTeacherMethods(unittest.TestCase):
   
   def test_000_professores_retorna_lista(self):
-    response = requests.get('http://localhost:5000/professores').json()
+    response = requests.get("http://localhost:5000/api/professores").json()
     self.assertEqual(type(response), type([]))
     
   def test_001_criar_professor_sucesso(self):
@@ -18,7 +16,7 @@ class TestTeacherMethods(unittest.TestCase):
       "observacoes": "Ele disponibiliza materiais complementares, como slides, artigos e listas de exercícios, que ajudam os alunos a revisar e aprofundar o conteúdo após a aula."
     }
     
-    response = requests.post("http://localhost:5000/professores",json=professor) 
+    response = requests.post("http://localhost:5000/api/professores",json=professor) 
     print(response)
     self.assertEqual(response.json(), professor)
    
@@ -30,7 +28,7 @@ class TestTeacherMethods(unittest.TestCase):
       "materia": "SQL",
       "observacoes": "Ele disponibiliza materiais complementares, como slides, artigos e listas de exercícios, que ajudam os alunos a revisar e aprofundar o conteúdo após a aula."
     }
-    response = requests.post("http://localhost:5000/professores",json=professor)
+    response = requests.post("http://localhost:5000/api/professores",json=professor)
     self.assertEqual(response.status_code,400)
     response_data = response.json()
     self.assertEqual(response_data['mensagem'], "O campo 'id' é obrigatório e deve estar preenchido.")
@@ -42,7 +40,7 @@ class TestTeacherMethods(unittest.TestCase):
       "materia": "SQL",
       "observacoes": "Ele disponibiliza materiais complementares, como slides, artigos e listas de exercícios, que ajudam os alunos a revisar e aprofundar o conteúdo após a aula."
     }
-    response = requests.post("http://localhost:5000/professores",json=professor)
+    response = requests.post("http://localhost:5000/api/professores",json=professor)
     self.assertEqual(response.status_code,400)
     response_data = response.json()
     self.assertEqual(response_data['mensagem'], "O campo 'nome' é obrigatório e deve estar preenchido.")
@@ -53,7 +51,7 @@ class TestTeacherMethods(unittest.TestCase):
       "materia": "SQL",
       "observacoes": "Ele disponibiliza materiais complementares, como slides, artigos e listas de exercícios, que ajudam os alunos a revisar e aprofundar o conteúdo após a aula."
     }
-    response = requests.post("http://localhost:5000/professores",json=professor)
+    response = requests.post("http://localhost:5000/api/professores",json=professor)
     self.assertEqual(response.status_code,400)
     response_data = response.json()
     self.assertEqual(response_data['mensagem'], "O campo 'idade' é obrigatório e deve estar preenchido.")
@@ -64,22 +62,22 @@ class TestTeacherMethods(unittest.TestCase):
       "materia": None,
       "observacoes": "Ele disponibiliza materiais complementares, como slides, artigos e listas de exercícios, que ajudam os alunos a revisar e aprofundar o conteúdo após a aula."
     }
-    response = requests.post("http://localhost:5000/professores",json=professor)
+    response = requests.post("http://localhost:5000/api/professores",json=professor)
     self.assertEqual(response.status_code,400)
     response_data = response.json()
     self.assertEqual(response_data['mensagem'], "O campo 'materia' é obrigatório e deve estar preenchido.")
     
   def test_003_buscar_professor_id_sucesso(self):
     id = 1023
-    response = requests.get(f"http://localhost:5000/professores/{id}")
+    response = requests.get(f"http://localhost:5000/api/professores/{id}")
     professor = response.json()
     self.assertEqual(response.status_code, 200)
     self.assertIsNotNone(professor)
     self.assertEqual(professor['nome'], "Lucas Silva")
     
   def test_004_buscar_professor_id_erro(self):
-    id = 1029
-    response = requests.get(f"http://localhost:5000/professores/{id}")
+    id_erro = 1029
+    response = requests.get(f"http://localhost:5000/api/professores/{id_erro}")
     self.assertEqual(response.status_code, 404)
 
   def test_005_att_professor_sucesso(self):
@@ -90,7 +88,7 @@ class TestTeacherMethods(unittest.TestCase):
       'materia': 'Matemática Aplicada',
       'observacoes': 'Durante as aulas, ela incentiva a participação dos alunos, fazendo perguntas e promovendo discussões para garantir que todos acompanhem o ritmo.'
     }
-    response = requests.put(f"http://localhost:5000/professores/{professor_att['id']}",json=professor_att)
+    response = requests.put(f"http://localhost:5000/api/professores/{professor_att['id']}",json=professor_att)
     self.assertEqual(response.status_code,200)
     self.assertEqual(response.json(),professor_att)
 
@@ -102,32 +100,24 @@ class TestTeacherMethods(unittest.TestCase):
       'materia': 'Matemática Aplicada',
       'observacoes': 'Durante as aulas, ela incentiva a participação dos alunos, fazendo perguntas e promovendo discussões para garantir que todos acompanhem o ritmo.'
     }
-    response = requests.put(f"http://localhost:5000/professores/{professor_att['id']}",json=professor_att)
+    response = requests.put(f"http://localhost:5000/api/professores/{professor_att['id']}",json=professor_att)
     self.assertEqual(response.status_code,400)
 
   def test_007_deletar_professor_sucesso(self):
     professor_removido = {
-        'id': 1025,
-        'nome': 'Pedro Santos',
-        'idade': 30,
-        'materia': 'Estrutura de Dados',
-        'observacoes': 'Ele costuma apresentar exemplos do dia a dia ou casos reais para ajudar na aplicação dos conceitos.'
+      "id": 1028,
+      "nome": "José Reis",
+      "idade": 35,
+      "materia": "SQL",
+      "observacoes": "Ele disponibiliza materiais complementares, como slides, artigos e listas de exercícios, que ajudam os alunos a revisar e aprofundar o conteúdo após a aula."
     }
-    requests.post("http://localhost:5000/professores", json=professor_removido)
-    response = requests.delete(f"http://localhost:5000/professores/{professor_removido['id']}")
+    response = requests.delete(f"http://localhost:5000/api/professores/{professor_removido['id']}")
     self.assertEqual(response.status_code, 200)
     self.assertEqual(response.json(), professor_removido)
  
   def test_008_deletar_professor_erro(self):
-    professor_removido = {
-        'id': 15,
-        'nome': 'Pedro Santos',
-        'idade': 30,
-        'materia': 'Estrutura de Dados',
-        'observacoes': 'Ele costuma apresentar exemplos do dia a dia ou casos reais para ajudar na aplicação dos conceitos.'
-    }
-    requests.post("http://localhost:5000/professores", json=professor_removido)
-    response = requests.delete(f"http://localhost:5000/professores/{professor_removido['id']}")
+    id = 15
+    response = requests.delete(f"http://localhost:5000/api/professores/{id}")
     self.assertEqual(response.status_code, 400)
  
  
