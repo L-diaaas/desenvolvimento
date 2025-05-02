@@ -4,6 +4,11 @@ from turmas.turmas_model import Turmas
 from datetime import datetime
 import requests
 
+
+# instalar os requirements com pip install -r requirements.txt
+# rodar da raiz com python -m unittest testes.testes_alunos_turmas_professores
+
+
 class TestTurmasRotas(unittest.TestCase):
 
     def setUp(self):

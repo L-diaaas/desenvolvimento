@@ -14,7 +14,7 @@ class TestAlunosRotas(unittest.TestCase):
             db.create_all()
 
             from professores.professores_model import Professor
-            professor = Professor(
+            professor = professor(
                 nome="Prof. Teste",
                 idade=46,
                 materia="Biologia",
