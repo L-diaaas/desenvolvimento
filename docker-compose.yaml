@@ -1,0 +1,37 @@
+version: "3.7"
+
+services:
+  app:
+    build: . 
+    ports:
+      - "5000:5000"  
+    volumes:
+      - .:/app
+    environment:
+      MYSQL_ROOT_PASSWORD: senha1234
+      MYSQL_DATABASE: dev
+      MYSQL_USER: UserBlog
+      MYSQL_PASSWORD: PwdBlog
+    depends_on:
+      - db
+    networks:
+      - minha-rede
+
+  db:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: "Senha123"
+      MYSQL_DATABASE: "testedb"
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - minha-rede
+
+networks:
+  minha-rede:
+    driver: bridge
+
+volumes:
+  db_data:

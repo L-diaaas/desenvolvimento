@@ -8,7 +8,8 @@ CORS(app)
 app.config['HOST'] = '0.0.0.0'
 app.config['PORT']=5000
 app.config['DEBUG'] = True
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///app.db"
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///meubanco.db'
+# app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('SQLALCHEMY_DATABASE_URI', 'mysql://root:123456@localhost/dev')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
